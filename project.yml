@@ -1,0 +1,34 @@
+name: AltoOBDDashboard
+options:
+  bundleIdPrefix: com.altoobd
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "15.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    TARGETED_DEVICE_FAMILY: "1,2"
+targets:
+  AltoOBDDashboard:
+    type: application
+    platform: iOS
+    sources:
+      - path: AltoOBDDashboard
+    info:
+      path: AltoOBDDashboard/Resources/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.altoobd.dashboard
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+  AltoOBDDashboardTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: AltoOBDDashboardTests
+    dependencies:
+      - target: AltoOBDDashboard
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.altoobd.dashboard.tests

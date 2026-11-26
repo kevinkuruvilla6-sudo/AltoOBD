@@ -1,0 +1,367 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		61ADB14BDC7242349C0E690F /* AltoOBDDashboardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28CC2EBE27428086AD6732D4 /* AltoOBDDashboardApp.swift */; };
+		B337F18EEA92A206907E9506 /* VehicleProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ECD096A8EFA8885BFD86451 /* VehicleProfile.swift */; };
+		8F3448C3F1846E30D1BA5981 /* OBDPID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A35E28E25EB3EEF5FD72B0A /* OBDPID.swift */; };
+		9C0F92A1F764290FFFBC020B /* DiagnosticCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9D9D9259BA714ABB897C0E5 /* DiagnosticCode.swift */; };
+		DAEBC1F416392888949B68CE /* TelemetrySnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9575B9074E4B1B91D002C590 /* TelemetrySnapshot.swift */; };
+		4DE5DD7BD300296A1DD9E3A4 /* ELM327Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8839A16FA60A0C49CC0667B /* ELM327Parser.swift */; };
+		72C1BD88DA9CF422D2527B47 /* BLEOBDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F4E5BD627E70BF10895A79 /* BLEOBDManager.swift */; };
+		CD6B74F25C8F91391EC0CC94 /* TripStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9FD75BA97124EE23B569D17 /* TripStore.swift */; };
+		207B92C4D322953F54CB3656 /* OBDCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DD582CFBDAB8981090B6F05 /* OBDCoordinator.swift */; };
+		BDB09490AD71D5737FF3973B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFC070575DD90708A072486 /* ContentView.swift */; };
+		24752236BB5158CFDAA5BEE0 /* CircularGaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11AAA7337F0797E0F9621678 /* CircularGaugeView.swift */; };
+		E19A5AAC23230E7AF2C78BBE /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FD4FC46DA3287AF660E1D68 /* DashboardView.swift */; };
+		A0AFF64A743A0F075BF09FC6 /* TripsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D874396FCD018CA2102443E0 /* TripsView.swift */; };
+		8C6BE65CC1A44B33CC06CED6 /* DiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5315B2E673F245DCE33234A6 /* DiagnosticsView.swift */; };
+		073AC3933F0C2B02D3FDE61B /* ConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB1B528A17676904EF87686 /* ConnectionView.swift */; };
+		2F2FC7B3FAA5D93C8E663A66 /* ELM327ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F0CFF42DAB28A05648CDCE /* ELM327ParserTests.swift */; };
+		26A6F35A55D189BE5F0B8F24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 11534C8FFA6E6BF546C540D9 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9ADCF2CAED6C30B3F5D185AB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3D4C91345015A4DD0A099400;
+			remoteInfo = AltoOBDDashboard;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		28CC2EBE27428086AD6732D4 /* AltoOBDDashboardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AltoOBDDashboardApp.swift; path = AltoOBDDashboard/App/AltoOBDDashboardApp.swift; sourceTree = SOURCE_ROOT; };
+		7ECD096A8EFA8885BFD86451 /* VehicleProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleProfile.swift; path = AltoOBDDashboard/Models/VehicleProfile.swift; sourceTree = SOURCE_ROOT; };
+		1A35E28E25EB3EEF5FD72B0A /* OBDPID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OBDPID.swift; path = AltoOBDDashboard/Models/OBDPID.swift; sourceTree = SOURCE_ROOT; };
+		E9D9D9259BA714ABB897C0E5 /* DiagnosticCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DiagnosticCode.swift; path = AltoOBDDashboard/Models/DiagnosticCode.swift; sourceTree = SOURCE_ROOT; };
+		9575B9074E4B1B91D002C590 /* TelemetrySnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TelemetrySnapshot.swift; path = AltoOBDDashboard/Models/TelemetrySnapshot.swift; sourceTree = SOURCE_ROOT; };
+		E8839A16FA60A0C49CC0667B /* ELM327Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ELM327Parser.swift; path = AltoOBDDashboard/Services/ELM327Parser.swift; sourceTree = SOURCE_ROOT; };
+		A7F4E5BD627E70BF10895A79 /* BLEOBDManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BLEOBDManager.swift; path = AltoOBDDashboard/Services/BLEOBDManager.swift; sourceTree = SOURCE_ROOT; };
+		D9FD75BA97124EE23B569D17 /* TripStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripStore.swift; path = AltoOBDDashboard/Services/TripStore.swift; sourceTree = SOURCE_ROOT; };
+		9DD582CFBDAB8981090B6F05 /* OBDCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OBDCoordinator.swift; path = AltoOBDDashboard/Services/OBDCoordinator.swift; sourceTree = SOURCE_ROOT; };
+		DFFC070575DD90708A072486 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = AltoOBDDashboard/Views/ContentView.swift; sourceTree = SOURCE_ROOT; };
+		11AAA7337F0797E0F9621678 /* CircularGaugeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CircularGaugeView.swift; path = AltoOBDDashboard/Views/Dashboard/CircularGaugeView.swift; sourceTree = SOURCE_ROOT; };
+		7FD4FC46DA3287AF660E1D68 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DashboardView.swift; path = AltoOBDDashboard/Views/Dashboard/DashboardView.swift; sourceTree = SOURCE_ROOT; };
+		D874396FCD018CA2102443E0 /* TripsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripsView.swift; path = AltoOBDDashboard/Views/Trips/TripsView.swift; sourceTree = SOURCE_ROOT; };
+		5315B2E673F245DCE33234A6 /* DiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DiagnosticsView.swift; path = AltoOBDDashboard/Views/Diagnostics/DiagnosticsView.swift; sourceTree = SOURCE_ROOT; };
+		1FB1B528A17676904EF87686 /* ConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ConnectionView.swift; path = AltoOBDDashboard/Views/Connection/ConnectionView.swift; sourceTree = SOURCE_ROOT; };
+		63F0CFF42DAB28A05648CDCE /* ELM327ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ELM327ParserTests.swift; path = AltoOBDDashboardTests/ELM327ParserTests.swift; sourceTree = SOURCE_ROOT; };
+		11534C8FFA6E6BF546C540D9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = AltoOBDDashboard/Resources/Assets.xcassets; sourceTree = SOURCE_ROOT; };
+		8921EE4623F263F90A62A23D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = AltoOBDDashboard/Resources/Info.plist; sourceTree = SOURCE_ROOT; };
+		81918909E83595C8F4212CCC /* AltoOBDDashboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AltoOBDDashboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		858E33F033846B57054E0712 /* AltoOBDDashboardTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AltoOBDDashboardTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6778DD046346DCCCC9E596A7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ED2DA7A3D5573A78393CC020 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		8D3FC6DB5D0827F168A73277 = {
+			isa = PBXGroup;
+			children = (
+				CE882751F8B3EE4485706ED4 /* AltoOBDDashboard */,
+				24DFAD7E3B56719996E6F208 /* AltoOBDDashboardTests */,
+				1BADDC1D73C1A20F347483E1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CE882751F8B3EE4485706ED4 /* AltoOBDDashboard */ = {
+			isa = PBXGroup;
+			children = (
+				28CC2EBE27428086AD6732D4 /* AltoOBDDashboardApp.swift */,
+				7ECD096A8EFA8885BFD86451 /* VehicleProfile.swift */,
+				1A35E28E25EB3EEF5FD72B0A /* OBDPID.swift */,
+				E9D9D9259BA714ABB897C0E5 /* DiagnosticCode.swift */,
+				9575B9074E4B1B91D002C590 /* TelemetrySnapshot.swift */,
+				E8839A16FA60A0C49CC0667B /* ELM327Parser.swift */,
+				A7F4E5BD627E70BF10895A79 /* BLEOBDManager.swift */,
+				D9FD75BA97124EE23B569D17 /* TripStore.swift */,
+				9DD582CFBDAB8981090B6F05 /* OBDCoordinator.swift */,
+				DFFC070575DD90708A072486 /* ContentView.swift */,
+				11AAA7337F0797E0F9621678 /* CircularGaugeView.swift */,
+				7FD4FC46DA3287AF660E1D68 /* DashboardView.swift */,
+				D874396FCD018CA2102443E0 /* TripsView.swift */,
+				5315B2E673F245DCE33234A6 /* DiagnosticsView.swift */,
+				1FB1B528A17676904EF87686 /* ConnectionView.swift */,
+				11534C8FFA6E6BF546C540D9 /* Assets.xcassets */,
+				8921EE4623F263F90A62A23D /* Info.plist */,
+			);
+			name = AltoOBDDashboard;
+			sourceTree = "<group>";
+		};
+		24DFAD7E3B56719996E6F208 /* AltoOBDDashboardTests */ = {
+			isa = PBXGroup;
+			children = (
+				63F0CFF42DAB28A05648CDCE /* ELM327ParserTests.swift */,
+			);
+			name = AltoOBDDashboardTests;
+			sourceTree = "<group>";
+		};
+		1BADDC1D73C1A20F347483E1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				81918909E83595C8F4212CCC /* AltoOBDDashboard.app */,
+				858E33F033846B57054E0712 /* AltoOBDDashboardTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3D4C91345015A4DD0A099400 /* AltoOBDDashboard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BBFE79A791796F23E65A3A86 /* Build configuration list for PBXNativeTarget "AltoOBDDashboard" */;
+			buildPhases = (
+				99494C080E59D45263DB55A7 /* Sources */,
+				6778DD046346DCCCC9E596A7 /* Frameworks */,
+				A342AAEA3B8E071C11D96578 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AltoOBDDashboard;
+			productName = AltoOBDDashboard;
+			productReference = 81918909E83595C8F4212CCC /* AltoOBDDashboard.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DFEE19449146DDDB4DD78AD1 /* AltoOBDDashboardTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17B38E682BD72975D541E22C /* Build configuration list for PBXNativeTarget "AltoOBDDashboardTests" */;
+			buildPhases = (
+				889885923DD4EB5770CCACFE /* Sources */,
+				ED2DA7A3D5573A78393CC020 /* Frameworks */,
+				2CA709B35F332BA1FDD91FA8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				551BDF5D8808EFCFB21091A6 /* PBXTargetDependency */,
+			);
+			name = AltoOBDDashboardTests;
+			productName = AltoOBDDashboardTests;
+			productReference = 858E33F033846B57054E0712 /* AltoOBDDashboardTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = 5BF065D48D8C23D03623AA6A /* Build configuration list for PBXProject "AltoOBDDashboard" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8D3FC6DB5D0827F168A73277;
+			productRefGroup = 1BADDC1D73C1A20F347483E1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3D4C91345015A4DD0A099400 /* AltoOBDDashboard */,
+				DFEE19449146DDDB4DD78AD1 /* AltoOBDDashboardTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A342AAEA3B8E071C11D96578 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				26A6F35A55D189BE5F0B8F24 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2CA709B35F332BA1FDD91FA8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		99494C080E59D45263DB55A7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61ADB14BDC7242349C0E690F /* AltoOBDDashboardApp.swift in Sources */,
+				B337F18EEA92A206907E9506 /* VehicleProfile.swift in Sources */,
+				8F3448C3F1846E30D1BA5981 /* OBDPID.swift in Sources */,
+				9C0F92A1F764290FFFBC020B /* DiagnosticCode.swift in Sources */,
+				DAEBC1F416392888949B68CE /* TelemetrySnapshot.swift in Sources */,
+				4DE5DD7BD300296A1DD9E3A4 /* ELM327Parser.swift in Sources */,
+				72C1BD88DA9CF422D2527B47 /* BLEOBDManager.swift in Sources */,
+				CD6B74F25C8F91391EC0CC94 /* TripStore.swift in Sources */,
+				207B92C4D322953F54CB3656 /* OBDCoordinator.swift in Sources */,
+				BDB09490AD71D5737FF3973B /* ContentView.swift in Sources */,
+				24752236BB5158CFDAA5BEE0 /* CircularGaugeView.swift in Sources */,
+				E19A5AAC23230E7AF2C78BBE /* DashboardView.swift in Sources */,
+				A0AFF64A743A0F075BF09FC6 /* TripsView.swift in Sources */,
+				8C6BE65CC1A44B33CC06CED6 /* DiagnosticsView.swift in Sources */,
+				073AC3933F0C2B02D3FDE61B /* ConnectionView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		889885923DD4EB5770CCACFE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2F2FC7B3FAA5D93C8E663A66 /* ELM327ParserTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		551BDF5D8808EFCFB21091A6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3D4C91345015A4DD0A099400 /* AltoOBDDashboard */;
+			targetProxy = 9ADCF2CAED6C30B3F5D185AB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		FA9139DD8B03E3F922556BF8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				ENABLE_TESTABILITY = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FFE2104CCFAB79205AC64460 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		72FB3ED29B4639D83EC5DB14 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = AltoOBDDashboard/Resources/Info.plist;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.altoobd.dashboard;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		191734982F22ABEBB64A1AE0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = AltoOBDDashboard/Resources/Info.plist;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.altoobd.dashboard;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		5AB3A6BF84C2901E813939E6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.altoobd.dashboard.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AltoOBDDashboard.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AltoOBDDashboard";
+			};
+			name = Debug;
+		};
+		54ECD3B736C66C8688F6C25B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.altoobd.dashboard.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AltoOBDDashboard.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AltoOBDDashboard";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5BF065D48D8C23D03623AA6A /* Build configuration list for PBXProject "AltoOBDDashboard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA9139DD8B03E3F922556BF8 /* Debug */,
+				FFE2104CCFAB79205AC64460 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BBFE79A791796F23E65A3A86 /* Build configuration list for PBXNativeTarget "AltoOBDDashboard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				72FB3ED29B4639D83EC5DB14 /* Debug */,
+				191734982F22ABEBB64A1AE0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		17B38E682BD72975D541E22C /* Build configuration list for PBXNativeTarget "AltoOBDDashboardTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5AB3A6BF84C2901E813939E6 /* Debug */,
+				54ECD3B736C66C8688F6C25B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}
