@@ -22,7 +22,7 @@ struct ContentView: View {
                 .tabItem {
                     Label("Diagnostics", systemImage: "wrench.and.screwdriver.fill")
                 }
-                .badge(coordinator.telemetry.milOn || !coordinator.storedDTCs.isEmpty ? "!" : nil)
+                .badge((coordinator.telemetry.milOn || !coordinator.storedDTCs.isEmpty) ? "!" : (nil as String?))
                 .tag(2)
 
             ConnectionView()

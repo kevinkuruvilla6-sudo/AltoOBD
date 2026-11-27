@@ -306,7 +306,7 @@ struct DashboardView: View {
 
                 // Throttle Position
                 vitalTile(
-                    icon: "pedal.accelerator.fill",
+                    icon: "dial.high.fill",
                     title: "Throttle",
                     value: String(format: "%.0f%%", snap.throttlePositionPercent),
                     subtitle: snap.throttlePositionPercent < 15 ? "Idle / Coast" : "Active",

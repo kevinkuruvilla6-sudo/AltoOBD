@@ -1,4 +1,6 @@
 import Foundation
+import Combine
+import SwiftUI
 
 /// A completed or active driving trip with integrated distance, fuel consumption, and engine extremes.
 struct TripRecord: Identifiable, Codable, Equatable {
