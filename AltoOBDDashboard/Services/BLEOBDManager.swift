@@ -7,10 +7,32 @@ struct DiscoveredOBDDevice: Identifiable, Equatable {
     let id: UUID
     let name: String
     let rssi: Int
+    let isLikelyOBD: Bool
     let peripheral: CBPeripheral
 
     static func == (lhs: DiscoveredOBDDevice, rhs: DiscoveredOBDDevice) -> Bool {
-        lhs.id == rhs.id && lhs.name == rhs.name && lhs.rssi == rhs.rssi
+        lhs.id == rhs.id && lhs.name == rhs.name && lhs.rssi == rhs.rssi && lhs.isLikelyOBD == rhs.isLikelyOBD
+    }
+}
+
+/// Selectable ELM327 OBD-II protocols (helpful when ELM327 clones struggle with Auto-detect on Suzuki ECUs).
+enum ELMProtocolOption: String, CaseIterable, Identifiable {
+    case auto = "0"
+    case can11Bit500k = "6"
+    case kwp2000Fast = "5"
+    case kwp2000Slow = "4"
+    case iso9141 = "3"
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .auto: return "Auto Detect (ATSP0)"
+        case .can11Bit500k: return "ISO 15765 CAN 11/500 (ATSP6)"
+        case .kwp2000Fast: return "ISO 14230 KWP Fast (ATSP5)"
+        case .kwp2000Slow: return "ISO 14230 KWP 5-Baud (ATSP4)"
+        case .iso9141: return "ISO 9141-2 (ATSP3)"
+        }
     }
 }
 
@@ -27,7 +49,7 @@ enum BLEConnectionState: Equatable {
         switch self {
         case .bluetoothUnavailable(let msg): return msg
         case .disconnected: return "Disconnected"
-        case .scanning: return "Scanning for BLE OBD…"
+        case .scanning: return "Scanning for BLE ELM327…"
         case .connecting(let name): return "Connecting to \(name)…"
         case .initializingELM(let name): return "Initializing \(name)…"
         case .connected(let name): return "Connected: \(name)"
@@ -55,35 +77,48 @@ enum OBDCommandError: LocalizedError {
     }
 }
 
-/// CoreBluetooth BLE client supporting all common iOS-compatible ELM327 BLE 4.0+ adapters:
-/// Veepeak OBDCheck BLE, Vgate iCar Pro BLE, OBDLink CX, LELink, HM-10 / FFE0, FFF0, and 18F0 dongles.
+/// CoreBluetooth BLE client supporting all common iOS-compatible ELM327 BLE 4.0/5.0 adapters:
+/// Veepeak, Vgate iCar Pro BLE, OBDLink CX, LELink, Konnwei, HM-10/CC2541, JDY-23, Nordic UART, ISSC, and ELM327 BLE clones.
 final class BLEOBDManager: NSObject, ObservableObject {
     @Published private(set) var state: BLEConnectionState = .disconnected
     @Published private(set) var discoveredDevices: [DiscoveredOBDDevice] = []
     @Published private(set) var detectedProtocolName: String = "Auto"
     @Published private(set) var elmVersion: String = "Unknown"
     @Published private(set) var commandLog: [String] = []
+    @Published var showAllBLEDevices: Bool = false
+    @Published var preferredProtocol: ELMProtocolOption = .auto
 
-    /// Known BLE OBD-II UART service UUIDs
+    /// Known BLE OBD-II UART service UUIDs across genuine and clone ELM327 BLE dongles
     static let knownServiceUUIDs: [CBUUID] = [
-        CBUUID(string: "FFF0"), // Vgate iCar Pro BLE, Veepeak, many ELM327 BLE
-        CBUUID(string: "FFE0"), // HM-10 / CC2541 BLE OBD adapters
+        CBUUID(string: "FFF0"), // Vgate iCar Pro BLE, Veepeak, ELM327 BLE clones
+        CBUUID(string: "FFE0"), // HM-10 / CC2541 / JDY-23 BLE ELM327 dongles
         CBUUID(string: "18F0"), // Veepeak BLE+ / OBDLink CX style
-        CBUUID(string: "E7810A71-73AE-499D-8C15-FAA9AEF0C3F2") // LELink / IOS-Vlink
+        CBUUID(string: "AE30"), // Common ELM327 BLE v2.1 clones
+        CBUUID(string: "AF30"), // Common ELM327 BLE v2.1 clones
+        CBUUID(string: "E7810A71-73AE-499D-8C15-FAA9AEF0C3F2"), // LELink / IOS-Vlink
+        CBUUID(string: "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"), // Nordic UART (NUS / ESP32 bridges)
+        CBUUID(string: "49535343-FE7D-4AE5-8FA9-9FAFD205E455")  // ISSC / Microchip Transparent UART
     ]
 
     private static let knownWriteUUIDs: Set<CBUUID> = [
         CBUUID(string: "FFF2"),
         CBUUID(string: "FFE1"),
+        CBUUID(string: "FFE2"),
         CBUUID(string: "2AF1"),
-        CBUUID(string: "BEF8D6C9-9C21-4C9E-B632-BD58C1009F9F")
+        CBUUID(string: "AE01"),
+        CBUUID(string: "BEF8D6C9-9C21-4C9E-B632-BD58C1009F9F"),
+        CBUUID(string: "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"),
+        CBUUID(string: "49535343-8841-43F4-A8D4-ECBE34729BB3")
     ]
 
     private static let knownNotifyUUIDs: Set<CBUUID> = [
         CBUUID(string: "FFF1"),
         CBUUID(string: "FFE1"),
         CBUUID(string: "2AF0"),
-        CBUUID(string: "BEF8D6C9-9C21-4C9E-B632-BD58C1009F9F")
+        CBUUID(string: "AE02"),
+        CBUUID(string: "BEF8D6C9-9C21-4C9E-B632-BD58C1009F9F"),
+        CBUUID(string: "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"),
+        CBUUID(string: "49535343-1E4D-4BD9-BA61-23C647249616")
     ]
 
     private let lastDeviceKey = "AltoOBD.LastConnectedPeripheralUUID"
@@ -96,8 +131,8 @@ final class BLEOBDManager: NSObject, ObservableObject {
     private var responseBuffer = ""
     private var pendingContinuation: CheckedContinuation<String, Error>?
     private var pendingTimeoutWorkItem: DispatchWorkItem?
-    private let commandLock = NSLock()
     private var isCommandInFlight = false
+    private var didStartInit = false
 
     override init() {
         super.init()
@@ -113,7 +148,7 @@ final class BLEOBDManager: NSObject, ObservableObject {
         }
         discoveredDevices.removeAll()
         state = .scanning
-        // Scan with nil services so adapters advertising custom/generic names are still discovered
+        // Scan all BLE devices so even unnamed or non-standard ELM327 BLE dongles appear
         centralManager.scanForPeripherals(withServices: nil, options: [
             CBCentralManagerScanOptionAllowDuplicatesKey: false
         ])
@@ -135,6 +170,7 @@ final class BLEOBDManager: NSObject, ObservableObject {
         activePeripheral?.delegate = self
         writeCharacteristic = nil
         notifyCharacteristic = nil
+        didStartInit = false
         state = .connecting(device.name)
         UserDefaults.standard.set(device.id.uuidString, forKey: lastDeviceKey)
         appendLog("Connecting to \(device.name)...")
@@ -150,8 +186,8 @@ final class BLEOBDManager: NSObject, ObservableObject {
         }
         let known = centralManager.retrievePeripherals(withIdentifiers: [uuid])
         if let peripheral = known.first {
-            let name = peripheral.name ?? "Saved OBD Adapter"
-            let device = DiscoveredOBDDevice(id: peripheral.identifier, name: name, rssi: -60, peripheral: peripheral)
+            let name = peripheral.name ?? "Saved ELM327 Adapter"
+            let device = DiscoveredOBDDevice(id: peripheral.identifier, name: name, rssi: -60, isLikelyOBD: true, peripheral: peripheral)
             connect(to: device)
         } else {
             startScanning()
@@ -167,23 +203,23 @@ final class BLEOBDManager: NSObject, ObservableObject {
         activePeripheral = nil
         writeCharacteristic = nil
         notifyCharacteristic = nil
+        didStartInit = false
         state = .disconnected
         appendLog("Disconnected")
     }
 
-    // MARK: - Command Sending (Async Serialized)
+    // MARK: - Command Sending (Async Serialized, Clone-Safe)
 
     /// Sends an AT or OBD-II command (e.g., "ATZ", "010C") and awaits the ELM327 `>` prompt.
     @MainActor
-    func sendCommand(_ command: String, timeout: TimeInterval = 2.5) async throws -> String {
+    func sendCommand(_ command: String, timeout: TimeInterval = 2.8) async throws -> String {
         guard let peripheral = activePeripheral,
               let writeChar = writeCharacteristic else {
             throw OBDCommandError.notConnected
         }
 
-        // Wait briefly if another command is still finishing
         while isCommandInFlight {
-            try await Task.sleep(nanoseconds: 15_000_000)
+            try await Task.sleep(nanoseconds: 20_000_000)
         }
 
         isCommandInFlight = true
@@ -202,10 +238,18 @@ final class BLEOBDManager: NSObject, ObservableObject {
 
             let workItem = DispatchWorkItem { [weak self] in
                 guard let self else { return }
-                let partial = self.responseBuffer
-                self.pendingContinuation?.resume(throwing: OBDCommandError.timeout(command))
-                self.pendingContinuation = nil
-                self.appendLog("! Timeout on \(command) (partial: \(partial))")
+                let partial = self.responseBuffer.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !partial.isEmpty && (partial.contains("41") || partial.contains("OK") || partial.contains("ELM")) {
+                    // Some ELM327 clones omit the trailing '>' prompt occasionally; accept valid partial data
+                    self.responseBuffer = ""
+                    self.pendingContinuation?.resume(returning: partial)
+                    self.pendingContinuation = nil
+                    self.appendLog("< (no prompt) \(partial)")
+                } else {
+                    self.pendingContinuation?.resume(throwing: OBDCommandError.timeout(command))
+                    self.pendingContinuation = nil
+                    self.appendLog("! Timeout on \(command) (partial: \(partial))")
+                }
             }
             self.pendingTimeoutWorkItem = workItem
             DispatchQueue.main.asyncAfter(deadline: .now() + timeout, execute: workItem)
@@ -213,31 +257,53 @@ final class BLEOBDManager: NSObject, ObservableObject {
             let writeType: CBCharacteristicWriteType = writeChar.properties.contains(.writeWithoutResponse)
                 ? .withoutResponse
                 : .withResponse
-            peripheral.writeValue(data, for: writeChar, type: writeType)
+
+            // Respect BLE MTU chunking (20 bytes safe minimum for older HM-10 / ELM327 BLE chips)
+            let maxLen = max(20, peripheral.maximumWriteValueLength(for: writeType))
+            var offset = 0
+            while offset < data.count {
+                let end = min(offset + maxLen, data.count)
+                let chunk = data.subdata(in: offset..<end)
+                peripheral.writeValue(chunk, for: writeChar, type: writeType)
+                offset = end
+            }
         }
     }
 
-    /// Runs the standard ELM327 initialization handshake optimized for Suzuki EOBD ECUs.
+    /// Runs a clone-safe ELM327 initialization handshake optimized for Suzuki Alto 800 EOBD ECUs.
     @MainActor
     func initializeELM327() async throws {
-        let name = activePeripheral?.name ?? "OBD Adapter"
+        let name = activePeripheral?.name ?? "ELM327 Adapter"
         state = .initializingELM(name)
 
-        // Reset ELM327 chip
-        let resetResp = try await sendCommand("ATZ", timeout: 4.0)
-        elmVersion = ELM327Parser.cleanLines(from: resetResp).first ?? "ELM327 BLE"
+        // Small settle delay after enabling BLE notifications (critical for HM-10 / ELM327 BLE clones)
+        try? await Task.sleep(nanoseconds: 250_000_000)
 
+        // Reset ELM327 chip; fall back to ATI if a cheap clone doesn't return '>' after ATZ
+        if let resetResp = try? await sendCommand("ATZ", timeout: 4.0) {
+            elmVersion = ELM327Parser.cleanLines(from: resetResp).first ?? "ELM327 BLE"
+            // Give slower ELM327 clones time to finish resetting
+            try? await Task.sleep(nanoseconds: 500_000_000)
+        } else {
+            let idResp = try await sendCommand("ATI", timeout: 3.0)
+            elmVersion = ELM327Parser.cleanLines(from: idResp).first ?? "ELM327 Clone"
+        }
+
+        // Standard init commands (tolerating clones that reject optional flags like ATS0)
         _ = try? await sendCommand("ATE0", timeout: 2.0) // Echo off
         _ = try? await sendCommand("ATL0", timeout: 2.0) // Linefeeds off
-        _ = try? await sendCommand("ATS0", timeout: 2.0) // Spaces off (faster throughput on BLE)
+        _ = try? await sendCommand("ATS0", timeout: 2.0) // Spaces off (optional)
         _ = try? await sendCommand("ATH0", timeout: 2.0) // Headers off
-        _ = try? await sendCommand("ATSP0", timeout: 2.0) // Auto-detect ECU protocol (CAN / KWP2000 / ISO9141)
+        _ = try? await sendCommand("ATAT1", timeout: 2.0) // Adaptive timing auto1
+        _ = try? await sendCommand("ATSP\(preferredProtocol.rawValue)", timeout: 2.5)
 
         // Probe ECU with 0100 to wake up protocol auto-detection
-        _ = try? await sendCommand("0100", timeout: 5.0)
+        _ = try? await sendCommand("0100", timeout: 6.0)
 
         if let protoResp = try? await sendCommand("ATDP", timeout: 2.0) {
-            detectedProtocolName = ELM327Parser.cleanLines(from: protoResp).first ?? "Auto"
+            detectedProtocolName = ELM327Parser.cleanLines(from: protoResp).first ?? preferredProtocol.label
+        } else {
+            detectedProtocolName = preferredProtocol.label
         }
 
         state = .connected(name)
@@ -273,10 +339,14 @@ final class BLEOBDManager: NSObject, ObservableObject {
         }
     }
 
-    /// Heuristic to prioritize likely OBD-II BLE adapters at the top of the scan list.
+    /// Heuristic to prioritize likely OBD-II / ELM327 BLE adapters at the top of the scan list.
     static func isLikelyOBDAdapter(name: String, serviceUUIDs: [CBUUID]?) -> Bool {
         let lower = name.lowercased()
-        let keywords = ["obd", "elm", "vgate", "veepeak", "vlink", "v-link", "icar", "carista", "lelink", "konnwei", "ios-vlink", "ble", "ecu"]
+        let keywords = [
+            "obd", "elm", "vgate", "veepeak", "vlink", "v-link", "icar",
+            "carista", "lelink", "konnwei", "ios-vlink", "ble", "ecu",
+            "hmsoft", "bt05", "jdy", "ch9141", "dual-spp", "kw90", "mini"
+        ]
         if keywords.contains(where: { lower.contains($0) }) { return true }
         if let uuids = serviceUUIDs, uuids.contains(where: { knownServiceUUIDs.contains($0) }) {
             return true
@@ -311,15 +381,31 @@ extension BLEOBDManager: CBCentralManagerDelegate {
         advertisementData: [String: Any],
         rssi RSSI: NSNumber
     ) {
+        let serviceUUIDs = advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID]
         let advertisedName = (advertisementData[CBAdvertisementDataLocalNameKey] as? String)
             ?? peripheral.name
             ?? ""
         let trimmed = advertisedName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
 
-        let serviceUUIDs = advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID]
+        let likelyOBD = Self.isLikelyOBDAdapter(name: trimmed, serviceUUIDs: serviceUUIDs)
+        let displayName: String
+        if !trimmed.isEmpty {
+            displayName = trimmed
+        } else if likelyOBD || showAllBLEDevices {
+            let shortID = String(peripheral.identifier.uuidString.prefix(4))
+            displayName = likelyOBD ? "Unnamed ELM327 BLE (\(shortID))" : "BLE Device (\(shortID))"
+        } else {
+            return
+        }
+
         let rssiVal = RSSI.intValue == 127 ? -99 : RSSI.intValue
-        let item = DiscoveredOBDDevice(id: peripheral.identifier, name: trimmed, rssi: rssiVal, peripheral: peripheral)
+        let item = DiscoveredOBDDevice(
+            id: peripheral.identifier,
+            name: displayName,
+            rssi: rssiVal,
+            isLikelyOBD: likelyOBD,
+            peripheral: peripheral
+        )
 
         if let existingIndex = discoveredDevices.firstIndex(where: { $0.id == item.id }) {
             discoveredDevices[existingIndex] = item
@@ -327,11 +413,9 @@ extension BLEOBDManager: CBCentralManagerDelegate {
             discoveredDevices.append(item)
         }
 
-        // Sort likely OBD adapters first, then by strongest signal
+        // Sort likely ELM327/OBD adapters first, then by strongest signal
         discoveredDevices.sort { lhs, rhs in
-            let lLikely = Self.isLikelyOBDAdapter(name: lhs.name, serviceUUIDs: serviceUUIDs)
-            let rLikely = Self.isLikelyOBDAdapter(name: rhs.name, serviceUUIDs: nil)
-            if lLikely != rLikely { return lLikely }
+            if lhs.isLikelyOBD != rhs.isLikelyOBD { return lhs.isLikelyOBD }
             return lhs.rssi > rhs.rssi
         }
     }
@@ -350,6 +434,7 @@ extension BLEOBDManager: CBCentralManagerDelegate {
         failPendingCommand(OBDCommandError.notConnected)
         writeCharacteristic = nil
         notifyCharacteristic = nil
+        didStartInit = false
         if let error {
             state = .error("Disconnected: \(error.localizedDescription)")
         } else {
@@ -367,11 +452,11 @@ extension BLEOBDManager: CBPeripheralDelegate {
             return
         }
         guard let services = peripheral.services, !services.isEmpty else {
-            state = .error("No BLE UART services found. Ensure your adapter is BLE 4.0+.")
+            state = .error("No BLE UART services found. Ensure your ELM dongle is BLE 4.0+ (not Classic BT 2.0/3.0).")
             return
         }
 
-        // Prioritize known OBD services first, else discover all
+        appendLog("Services: \(services.map { $0.uuid.uuidString }.joined(separator: ", "))")
         let matching = services.filter { Self.knownServiceUUIDs.contains($0.uuid) }
         let targets = matching.isEmpty ? services : matching
         for service in targets {
@@ -394,14 +479,33 @@ extension BLEOBDManager: CBPeripheralDelegate {
             }
         }
 
-        if writeCharacteristic != nil && notifyCharacteristic != nil,
-           case .connecting = state {
-            Task { @MainActor in
-                do {
-                    try await self.initializeELM327()
-                } catch {
-                    self.state = .error("ELM327 init failed: \(error.localizedDescription)")
-                }
+        startELMInitIfReady()
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+        if let error {
+            appendLog("Notify enable error: \(error.localizedDescription)")
+            return
+        }
+        if characteristic.isNotifying {
+            appendLog("Subscribed to \(characteristic.uuid.uuidString)")
+            startELMInitIfReady()
+        }
+    }
+
+    private func startELMInitIfReady() {
+        guard !didStartInit,
+              writeCharacteristic != nil,
+              notifyCharacteristic != nil,
+              case .connecting = state else {
+            return
+        }
+        didStartInit = true
+        Task { @MainActor in
+            do {
+                try await self.initializeELM327()
+            } catch {
+                self.state = .error("ELM327 init failed: \(error.localizedDescription)")
             }
         }
     }

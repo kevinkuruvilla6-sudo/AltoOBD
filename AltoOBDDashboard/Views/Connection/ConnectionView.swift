@@ -48,18 +48,42 @@ struct ConnectionView: View {
                         }
                     }
 
+                    Picker("ECU Protocol", selection: Binding(
+                        get: { coordinator.bleManager.preferredProtocol },
+                        set: { coordinator.bleManager.preferredProtocol = $0 }
+                    )) {
+                        ForEach(ELMProtocolOption.allCases) { option in
+                            Text(option.label).tag(option)
+                        }
+                    }
+
+                    Toggle("Show Unnamed BLE Devices", isOn: Binding(
+                        get: { coordinator.bleManager.showAllBLEDevices },
+                        set: { coordinator.bleManager.showAllBLEDevices = $0 }
+                    ))
+
                     ForEach(coordinator.bleManager.discoveredDevices) { device in
                         Button {
                             coordinator.setDemoMode(false)
                             coordinator.bleManager.connect(to: device)
                         } label: {
                             HStack {
-                                Image(systemName: "cpu")
-                                    .foregroundStyle(.cyan)
+                                Image(systemName: device.isLikelyOBD ? "antenna.radiowaves.left.and.right" : "cpu")
+                                    .foregroundStyle(device.isLikelyOBD ? .mint : .cyan)
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(device.name)
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundStyle(.white)
+                                    HStack(spacing: 6) {
+                                        Text(device.name)
+                                            .font(.subheadline.weight(.semibold))
+                                            .foregroundStyle(.white)
+                                        if device.isLikelyOBD {
+                                            Text("OBD")
+                                                .font(.caption2.weight(.bold))
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 1)
+                                                .background(Color.mint.opacity(0.2), in: Capsule())
+                                                .foregroundStyle(.mint)
+                                        }
+                                    }
                                     Text("Signal: \(device.rssi) dBm")
                                         .font(.caption2)
                                         .foregroundStyle(.secondary)
@@ -71,10 +95,24 @@ struct ConnectionView: View {
                             }
                         }
                     }
+
+                    if !coordinator.bleManager.commandLog.isEmpty {
+                        DisclosureGroup("ELM327 Connection Log") {
+                            VStack(alignment: .leading, spacing: 3) {
+                                ForEach(Array(coordinator.bleManager.commandLog.suffix(12).enumerated()), id: \.offset) { _, line in
+                                    Text(line)
+                                        .font(.system(.caption2, design: .monospaced))
+                                        .foregroundStyle(line.hasPrefix("!") ? .red : (line.hasPrefix(">") ? .cyan : .secondary))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
                 } header: {
-                    Text("Bluetooth LE OBD-II Adapter")
+                    Text("Bluetooth LE ELM327 Adapter")
                 } footer: {
-                    Text("iOS CoreBluetooth requires a Bluetooth Low Energy (BLE 4.0/5.0) OBD-II adapter such as Veepeak OBDCheck BLE, Vgate iCar Pro BLE, or OBDLink CX. Older Bluetooth Classic 2.0/3.0 blue ELM327 dongles are blocked by iOS.")
+                    Text("Do NOT pair in iPhone Settings — connect directly here via Scan BLE. Supports ELM327 BLE 4.0/5.0 dongles (FFF0/FFE0/18F0/Nordic/ISSC). Note: Older Bluetooth Classic 2.0/3.0 blue ELM327 dongles are blocked by iOS hardware restrictions.")
                 }
 
                 // Live Simulator Toggle
