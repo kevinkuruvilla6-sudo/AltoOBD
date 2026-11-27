@@ -286,4 +286,118 @@ enum ELM327Parser {
             source: source
         )
     }
+
+    // MARK: - Exhaust CO2 & Combustion Cleanliness / Smoke Risk Estimation
+
+    enum ExhaustCleanliness: String, Codable {
+        case clean = "Clean Burn"
+        case warmingUp = "Cold Warmup"
+        case elevated = "Elevated Output"
+        case highRisk = "Rich / High Risk"
+    }
+
+    struct EmissionsEstimate {
+        /// Petrol stoichiometric CO2 factor: ~2,310 g CO2 per litre of petrol burned (UK E5/E10 average)
+        static let petrolCO2GramsPerLiter: Double = 2310.0
+
+        /// Instantaneous CO2 mass flow rate (grams per minute)
+        let co2GramsPerMinute: Double
+        /// Distance-normalized CO2 output (grams per km) when moving; nil when stationary
+        let co2GramsPerKm: Double?
+        /// 0 (very clean) ... 100 (heavy rich-burn / high emissions risk) estimated smoke & pollution index
+        let smokeRiskScore: Int
+        let cleanliness: ExhaustCleanliness
+        let primaryFactor: String
+    }
+
+    /// Calculates exact stoichiometric CO2 emissions from fuel flow and estimates exhaust cleanliness / smoke risk
+    /// from coolant warmup, fuel trims (rich/lean mixture), engine load enrichment, and active MIL/DTCs.
+    /// Note: Petrol OBD-II ECUs do not have a physical tailpipe soot/PM sensor, so smoke risk is an ECU-derived estimate.
+    static func estimateExhaustEmissions(
+        fuelLitersPerHour: Double,
+        speedKmh: Double,
+        rpm: Double,
+        coolantCelsius: Double?,
+        engineLoadPercent: Double,
+        stftPercent: Double?,
+        ltftPercent: Double?,
+        milOn: Bool
+    ) -> EmissionsEstimate {
+        let co2PerMin = (max(fuelLitersPerHour, 0) * EmissionsEstimate.petrolCO2GramsPerLiter) / 60.0
+        let co2PerKm: Double?
+        if speedKmh > 2.0 && fuelLitersPerHour > 0.02 {
+            // (L/h * 2310 g/L) / (km/h) = g/km
+            co2PerKm = min((fuelLitersPerHour * EmissionsEstimate.petrolCO2GramsPerLiter) / speedKmh, 999.0)
+        } else {
+            co2PerKm = nil
+        }
+
+        guard rpm > 200 else {
+            return EmissionsEstimate(
+                co2GramsPerMinute: 0,
+                co2GramsPerKm: nil,
+                smokeRiskScore: 0,
+                cleanliness: .clean,
+                primaryFactor: "Engine Off"
+            )
+        }
+
+        var risk = 10.0
+        var reasons: [String] = []
+
+        // 1. Cold engine / catalyst not yet at light-off temp (high HC & CO)
+        if let coolant = coolantCelsius, coolant < 65.0 {
+            let coldPenalty = min(35.0, (65.0 - coolant) * 0.8)
+            risk += coldPenalty
+            reasons.append("Cold Catalyst")
+        }
+
+        // 2. Fuel trim deviations (negative trim = ECU pulling fuel because mixture is running rich)
+        let combinedTrim = (stftPercent ?? 0.0) + (ltftPercent ?? 0.0)
+        if combinedTrim < -10.0 {
+            risk += min(35.0, abs(combinedTrim + 10.0) * 2.5 + 15.0)
+            reasons.append("Rich Mixture")
+        } else if combinedTrim > 12.0 {
+            risk += min(25.0, (combinedTrim - 12.0) * 2.0 + 10.0)
+            reasons.append("Lean / High NOx")
+        }
+
+        // 3. High load power enrichment (open-loop full-throttle produces unburnt hydrocarbons & CO)
+        if engineLoadPercent > 78.0 {
+            risk += min(25.0, (engineLoadPercent - 78.0) * 1.1)
+            reasons.append("Heavy Load")
+        }
+
+        // 4. High CO2 intensity (>160 g/km for a small 800cc car)
+        if let gPerKm = co2PerKm, gPerKm > 160.0 {
+            risk += min(18.0, (gPerKm - 160.0) * 0.12)
+        }
+
+        // 5. Active Check Engine light (potential O2, catalyst, or misfire issue)
+        if milOn {
+            risk += 30.0
+            reasons.append("Check Engine Active")
+        }
+
+        let clampedRisk = max(0, min(100, Int(risk.rounded())))
+        let cleanliness: ExhaustCleanliness
+        if clampedRisk >= 65 {
+            cleanliness = .highRisk
+        } else if let coolant = coolantCelsius, coolant < 65.0, clampedRisk >= 28 {
+            cleanliness = .warmingUp
+        } else if clampedRisk >= 35 {
+            cleanliness = .elevated
+        } else {
+            cleanliness = .clean
+        }
+
+        let primaryFactor = reasons.first ?? "Optimal Stoichiometric Burn"
+        return EmissionsEstimate(
+            co2GramsPerMinute: co2PerMin,
+            co2GramsPerKm: co2PerKm,
+            smokeRiskScore: clampedRisk,
+            cleanliness: cleanliness,
+            primaryFactor: primaryFactor
+        )
+    }
 }

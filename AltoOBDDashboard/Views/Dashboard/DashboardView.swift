@@ -64,6 +64,9 @@ struct DashboardView: View {
                     // Prominent Mileage & Fuel Economy Card
                     mileageHeroCard
 
+                    // Exhaust CO2 & Combustion Cleanliness / Smoke Risk Card
+                    emissionsCard
+
                     // Vital Engine & Electrical Health Grid
                     vitalsGridSection
                 }
@@ -262,6 +265,90 @@ struct DashboardView: View {
         }
         .padding(16)
         .background(cardBackground)
+    }
+
+    private var emissionsCard: some View {
+        let badgeColor = exhaustColor(for: snap.exhaustCleanliness)
+        let tripCO2g = tripStore.currentTrip.totalCO2Kg * 1000.0
+        let tripCO2Text = tripStore.currentTrip.totalCO2Kg >= 1.0
+            ? String(format: "%.2f kg", tripStore.currentTrip.totalCO2Kg)
+            : String(format: "%.0f g", tripCO2g)
+
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("EXHAUST & EMISSIONS", systemImage: "smoke.fill")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(badgeColor)
+                    .tracking(0.8)
+                Spacer()
+                Text(snap.exhaustCleanliness.rawValue)
+                    .font(.caption2.weight(.bold))
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 4)
+                    .background(badgeColor.opacity(0.20), in: Capsule())
+                    .foregroundStyle(badgeColor)
+            }
+
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(alignment: .firstTextBaseline, spacing: 5) {
+                        Text(snap.co2GramsPerKm.map { String(format: "%.0f", $0) } ?? "--")
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(.white)
+                        Text("g CO₂/km")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    Text(String(format: "%.0f g/min live • Trip: %@", snap.co2GramsPerMinute, tripCO2Text))
+                        .font(.caption)
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("SMOKE / RICH RISK")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.secondary)
+                    Text("\(snap.smokeRiskScore)%")
+                        .font(.title3.weight(.bold))
+                        .monospacedDigit()
+                        .foregroundStyle(badgeColor)
+                    Text(snap.exhaustFactor)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.white.opacity(0.10))
+                    Capsule()
+                        .fill(badgeColor)
+                        .frame(width: geo.size.width * CGFloat(snap.smokeRiskScore) / 100.0)
+                        .animation(.easeOut(duration: 0.3), value: snap.smokeRiskScore)
+                }
+            }
+            .frame(height: 7)
+
+            Text("CO₂ calculated from petrol burn (2.31 kg/L). Smoke risk estimated from coolant warmup, fuel trims & load (no physical tailpipe soot sensor on petrol OBD-II).")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .background(cardBackground)
+    }
+
+    private func exhaustColor(for state: ELM327Parser.ExhaustCleanliness) -> Color {
+        switch state {
+        case .clean: return .green
+        case .warmingUp: return .cyan
+        case .elevated: return .orange
+        case .highRisk: return .red
+        }
     }
 
     private var vitalsGridSection: some View {

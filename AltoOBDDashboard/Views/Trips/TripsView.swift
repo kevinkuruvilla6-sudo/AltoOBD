@@ -78,9 +78,9 @@ struct TripsView: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 statCell("Distance", String(format: "%.2f %@", dist, units.distanceUnit))
                 statCell("Fuel Burned", String(format: "%.2f L", trip.fuelUsedLiters))
-                statCell("Duration", formatSeconds(trip.totalDurationSeconds))
+                statCell("Trip CO₂", String(format: "%.2f kg", trip.totalCO2Kg))
+                statCell("Avg CO₂", trip.averageCO2GramsPerKm.map { String(format: "%.0f g/km", $0) } ?? "--")
                 statCell("Avg Speed", String(format: "%.0f %@", avgSpeed, units.speedUnit))
-                statCell("Max Speed", String(format: "%.0f %@", maxSpeed, units.speedUnit))
                 statCell("Idle Time", String(format: "%.0f%%", trip.idlePercentage))
             }
         }
@@ -150,6 +150,8 @@ struct TripsView: View {
             statCell("Logged Dist", String(format: "%.1f %@", totalDist, units.distanceUnit))
             Spacer()
             statCell("Total Fuel", String(format: "%.2f L", tripStore.lifetimeFuelLiters))
+            Spacer()
+            statCell("Total CO₂", String(format: "%.1f kg", tripStore.lifetimeCO2Kg))
             Spacer()
             statCell("Overall Avg", avgEcon.map { String(format: "%.1f %@", $0, units.economyUnit) } ?? "--")
         }

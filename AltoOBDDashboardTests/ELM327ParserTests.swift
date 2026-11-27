@@ -68,4 +68,35 @@ final class ELM327ParserTests: XCTestCase {
         XCTAssertGreaterThan(ukMPG, 40.0)
         XCTAssertLessThan(ukMPG, 90.0)
     }
+
+    func testExhaustCO2AndSmokeRiskCalculation() throws {
+        // Warm optimal cruise: 3.0 L/h at 60 km/h -> (3 * 2310) / 60 = 115.5 g/km CO2
+        let clean = ELM327Parser.estimateExhaustEmissions(
+            fuelLitersPerHour: 3.0,
+            speedKmh: 60.0,
+            rpm: 2400.0,
+            coolantCelsius: 88.0,
+            engineLoadPercent: 40.0,
+            stftPercent: 1.0,
+            ltftPercent: 0.5,
+            milOn: false
+        )
+        XCTAssertEqual(try XCTUnwrap(clean.co2GramsPerKm), 115.5, accuracy: 0.2)
+        XCTAssertEqual(clean.cleanliness, .clean)
+        XCTAssertLessThan(clean.smokeRiskScore, 30)
+
+        // Cold rich burn with Check Engine light -> high risk
+        let rich = ELM327Parser.estimateExhaustEmissions(
+            fuelLitersPerHour: 6.0,
+            speedKmh: 40.0,
+            rpm: 3500.0,
+            coolantCelsius: 35.0,
+            engineLoadPercent: 88.0,
+            stftPercent: -12.0,
+            ltftPercent: -8.0,
+            milOn: true
+        )
+        XCTAssertEqual(rich.cleanliness, .highRisk)
+        XCTAssertGreaterThanOrEqual(rich.smokeRiskScore, 65)
+    }
 }

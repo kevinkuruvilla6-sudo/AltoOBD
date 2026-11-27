@@ -56,6 +56,13 @@ struct TelemetrySnapshot {
     var smoothedKmPerLiter: Double? = nil
     var fuelSource: ELM327Parser.FuelCalcSource = .unavailable
 
+    // Derived exhaust emissions & smoke/cleanliness estimate
+    var co2GramsPerMinute: Double = 0
+    var co2GramsPerKm: Double? = nil
+    var smokeRiskScore: Int = 0
+    var exhaustCleanliness: ELM327Parser.ExhaustCleanliness = .clean
+    var exhaustFactor: String = "Engine Off"
+
     /// 0...100 driving efficiency score based on RPM, throttle, load, and economy.
     var ecoScore: Int {
         guard rpm > 200 else { return 100 }

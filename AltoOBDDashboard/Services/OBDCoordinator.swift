@@ -196,6 +196,17 @@ final class OBDCoordinator: ObservableObject {
             profile: profile
         )
 
+        let emissions = ELM327Parser.estimateExhaustEmissions(
+            fuelLitersPerHour: fuel.fuelLitersPerHour,
+            speedKmh: targetSpeedKmh,
+            rpm: rpm,
+            coolantCelsius: coolant,
+            engineLoadPercent: load,
+            stftPercent: stft,
+            ltftPercent: ltft,
+            milOn: demoInjectedFault
+        )
+
         updateSmoothedEconomy(with: fuel.instantKmPerLiter)
 
         var snap = telemetry
@@ -221,6 +232,11 @@ final class OBDCoordinator: ObservableObject {
         snap.instantKmPerLiter = fuel.instantKmPerLiter
         snap.smoothedKmPerLiter = smoothedKmPerLiter
         snap.fuelSource = fuel.source
+        snap.co2GramsPerMinute = emissions.co2GramsPerMinute
+        snap.co2GramsPerKm = emissions.co2GramsPerKm
+        snap.smokeRiskScore = emissions.smokeRiskScore
+        snap.exhaustCleanliness = emissions.cleanliness
+        snap.exhaustFactor = emissions.primaryFactor
 
         telemetry = snap
         tripStore.recordTelemetry(snap, profile: profile)
@@ -380,12 +396,27 @@ final class OBDCoordinator: ObservableObject {
             ltftPercent: telemetry.longTermFuelTrimPercent,
             profile: profile
         )
+        let emissions = ELM327Parser.estimateExhaustEmissions(
+            fuelLitersPerHour: fuel.fuelLitersPerHour,
+            speedKmh: telemetry.speedKmh,
+            rpm: telemetry.rpm,
+            coolantCelsius: telemetry.coolantTempCelsius,
+            engineLoadPercent: telemetry.engineLoadPercent,
+            stftPercent: telemetry.shortTermFuelTrimPercent,
+            ltftPercent: telemetry.longTermFuelTrimPercent,
+            milOn: telemetry.milOn
+        )
         updateSmoothedEconomy(with: fuel.instantKmPerLiter)
         telemetry.timestamp = Date()
         telemetry.fuelFlowLitersPerHour = fuel.fuelLitersPerHour
         telemetry.instantKmPerLiter = fuel.instantKmPerLiter
         telemetry.smoothedKmPerLiter = smoothedKmPerLiter
         telemetry.fuelSource = fuel.source
+        telemetry.co2GramsPerMinute = emissions.co2GramsPerMinute
+        telemetry.co2GramsPerKm = emissions.co2GramsPerKm
+        telemetry.smokeRiskScore = emissions.smokeRiskScore
+        telemetry.exhaustCleanliness = emissions.cleanliness
+        telemetry.exhaustFactor = emissions.primaryFactor
 
         tripStore.recordTelemetry(telemetry, profile: profile)
     }

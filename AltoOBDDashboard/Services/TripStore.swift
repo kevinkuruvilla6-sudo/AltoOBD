@@ -68,6 +68,17 @@ struct TripRecord: Identifiable, Codable, Equatable {
     var estimatedFuelCost: Double {
         fuelUsedLiters * fuelPricePerLiter
     }
+
+    /// Total CO2 emitted during this trip in kilograms (~2.31 kg per litre of petrol burned).
+    var totalCO2Kg: Double {
+        (fuelUsedLiters * ELM327Parser.EmissionsEstimate.petrolCO2GramsPerLiter) / 1000.0
+    }
+
+    /// Average CO2 emissions in grams per km for this trip.
+    var averageCO2GramsPerKm: Double? {
+        guard distanceKm > 0.05, fuelUsedLiters > 0.005 else { return nil }
+        return (fuelUsedLiters * ELM327Parser.EmissionsEstimate.petrolCO2GramsPerLiter) / distanceKm
+    }
 }
 
 /// Manages active trip integration and persists saved trips to local JSON storage.
@@ -170,6 +181,10 @@ final class TripStore: ObservableObject {
     var lifetimeAverageKmPerLiter: Double? {
         guard lifetimeDistanceKm > 0.1, lifetimeFuelLiters > 0.01 else { return nil }
         return lifetimeDistanceKm / lifetimeFuelLiters
+    }
+
+    var lifetimeCO2Kg: Double {
+        (lifetimeFuelLiters * ELM327Parser.EmissionsEstimate.petrolCO2GramsPerLiter) / 1000.0
     }
 
     private func loadTrips() {
