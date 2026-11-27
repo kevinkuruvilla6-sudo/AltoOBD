@@ -14,14 +14,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Select Xcode
+      - name: Show Xcode version
         run: xcodebuild -version
+
+      - name: Generate Xcode project with XcodeGen
+        run: |
+          brew install xcodegen
+          xcodegen generate
 
       - name: Build unsigned iOS app
         run: |
           xcodebuild \
             -project AltoOBDDashboard.xcodeproj \
-            -target AltoOBDDashboard \
+            -scheme AltoOBDDashboard \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \

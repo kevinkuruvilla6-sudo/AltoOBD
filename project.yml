@@ -3,25 +3,34 @@ options:
   bundleIdPrefix: com.altoobd
   deploymentTarget:
     iOS: "16.0"
-  xcodeVersion: "15.0"
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
 settings:
   base:
     SWIFT_VERSION: "5.9"
     TARGETED_DEVICE_FAMILY: "1,2"
+    SWIFT_STRICT_CONCURRENCY: minimal
 targets:
   AltoOBDDashboard:
     type: application
     platform: iOS
     sources:
       - path: AltoOBDDashboard
-    info:
-      path: AltoOBDDashboard/Resources/Info.plist
+        excludes:
+          - Resources/Info.plist
     settings:
       base:
+        INFOPLIST_FILE: AltoOBDDashboard/Resources/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
         PRODUCT_BUNDLE_IDENTIFIER: com.altoobd.dashboard
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
         CODE_SIGN_STYLE: Automatic
+    scheme:
+      testTargets:
+        - AltoOBDDashboardTests
   AltoOBDDashboardTests:
     type: bundle.unit-test
     platform: iOS
@@ -31,4 +40,5 @@ targets:
       - target: AltoOBDDashboard
     settings:
       base:
+        GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: com.altoobd.dashboard.tests
